@@ -1,0 +1,83 @@
+import RPi.GPIO as GPIO
+import time
+
+#Pins to use SW PWM
+_GPI12 = 12
+
+#PWM Frecuency
+_FRECUENCY_50_HZ = 50
+
+#Define dutyCycles
+
+_DEGREES_N90 = 14
+_DEGREES_0 = 8
+_DEGREES_P90 = 3
+
+#Color
+WARNING = '\033[93m'
+GREEN = '\033[0;32m'
+ENDC = '\033[0m'
+
+GPIO.setmode(GPIO.BOARD)
+TRIG = 8
+ECHO = 10
+_GPIO3 = 12
+duty = 2
+giro = 0
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+GPIO.setup(_GPIO3, GPIO.OUT)
+servo = GPIO.PWM(_GPIO3, _FRECUENCY_50_HZ)
+
+print("Medicion de distancia en progreso")
+GPIO.setup(TRIG, GPIO.OUT)
+GPIO.setup(ECHO, GPIO.IN)
+GPIO.output(TRIG, False)
+distanciaAnterior = 0
+print("Esperando la respuesta del sensor")
+time.sleep(1)
+try:
+    while True:
+        GPIO.output(TRIG, True)
+        time.sleep(0.00001)
+        GPIO.output(TRIG, False)
+        while GPIO.input(ECHO) == 0:
+            pulse_Start = time.time()
+        while GPIO.input(ECHO) == 1:
+            pulse_end = time.time()
+            pulse_duration = pulse_end-pulse_Start
+            distancia = pulse_duration*17150
+            distancia = round(distancia, 2)
+            
+            #PWM
+            servo.start(_DEGREES_0)
+            if distancia < 10:
+                x = 1
+            while True:
+                 
+                duty = 2
+                duty = 12
+                time.sleep(.3)
+                break
+                
+            
+                
+            if distancia >11:
+                x = 0
+            else:
+                servo.ChangeDutyCycle(int(duty))
+                    
+        if abs(distancia-distanciaAnterior) < 10 and (distancia-distanciaAnterior) < 90:
+            time.sleep(.5)
+            print("distancia: ", giro, "cm")
+            print("distancia: ", distancia, "cm")
+        
+    servo.stop()
+    GPIO.cleanup()
+        
+        
+    distanciaAnterior = distancia
+          
+except KeyboardInterrupt:
+    GPIO.cleanup()
